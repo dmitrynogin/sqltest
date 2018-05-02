@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[People](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [varchar](10) NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+))
+
+go;
+
+insert into [People] ([Name]) values ('John Doe')  
