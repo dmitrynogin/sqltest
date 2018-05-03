@@ -73,6 +73,33 @@ namespace SqlTests
             }
         }
 
+        [TestMethod]
+        public void Should_See_Uncommitted_EF_Insert()
+        {
+            using (var scope = new TransactionScope(
+                TransactionScopeOption.Required,
+                new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted
+                }))
+            {
+                var ctx = new TestContext();
+                ctx.People.Add(new People { Name="Bill" });                
+                ctx.SaveChanges();
+
+                using (var c2 = new SqlConnection(CS))
+                {
+                    c2.Open();
+                    var cmd2 = c2.CreateCommand();
+                    cmd2.CommandText = "SELECT [Name] FROM [People] WHERE [Name] = 'Bill'";
+                    cmd2.CommandType = System.Data.CommandType.Text;
+                    var name = cmd2.ExecuteScalar();
+
+                    Assert.AreEqual("Bill", name);
+                }
+            }
+        }
+
 
         public class TestContext : DbContext
         {
