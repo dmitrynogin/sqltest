@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.Entity;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,7 +10,7 @@ namespace SqlTests
     [TestClass]
     public class UnitTest1
     {
-        const string CS = @"Data Source = (localdb)\MSSQLLocalDB; Initial Catalog = Test; Integrated Security = True; Connect Timeout = 30;";
+        const string CS = @"Data Source = .; Initial Catalog = Test; Integrated Security = True; Connect Timeout = 30;";
         const string Update = "UPDATE [People] SET [Name] = 'Tom' WHERE [Id] = 1";
         const string Select = "SELECT [Name] FROM [People] WHERE [Id] = 1";
         
@@ -60,16 +61,21 @@ namespace SqlTests
                 p.Name = "Tom";
                 ctx.SaveChanges();
 
-                using (var c2 = new SqlConnection(CS))
+                var tx = Transaction.Current;
+                var name = Task.Run(() =>
                 {
-                    c2.Open();
-                    var cmd2 = c2.CreateCommand();
-                    cmd2.CommandText = Select;
-                    cmd2.CommandType = System.Data.CommandType.Text;
-                    var name = cmd2.ExecuteScalar();
+                    using (var c2 = new SqlConnection(CS))
+                    using (var s = new TransactionScope(tx))
+                    {
+                        c2.Open();
+                        var cmd2 = c2.CreateCommand();
+                        cmd2.CommandText = Select;
+                        cmd2.CommandType = System.Data.CommandType.Text;
+                        return cmd2.ExecuteScalar();
+                    }
+                }).Result;
 
-                    Assert.AreEqual("Tom", name);
-                }
+                Assert.AreEqual("Tom", name);
             }
         }
 
