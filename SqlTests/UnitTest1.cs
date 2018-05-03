@@ -67,15 +67,25 @@ namespace SqlTests
                     using (var c2 = new SqlConnection(CS))
                     using (var s = new TransactionScope(tx))
                     {
-                        c2.Open();
-                        var cmd2 = c2.CreateCommand();
-                        cmd2.CommandText = Select;
-                        cmd2.CommandType = System.Data.CommandType.Text;
-                        return cmd2.ExecuteScalar();
+                        try
+                        {
+                            c2.Open();
+                            var cmd2 = c2.CreateCommand();
+                            cmd2.CommandText = Select;
+                            cmd2.CommandType = System.Data.CommandType.Text;
+                            var result = cmd2.ExecuteScalar();
+                            s.Complete();
+                            return result;
+                        }
+                        finally
+                        {
+
+                        }
                     }
                 }).Result;
 
                 Assert.AreEqual("Tom", name);
+                scope.Complete();
             }
         }
 
