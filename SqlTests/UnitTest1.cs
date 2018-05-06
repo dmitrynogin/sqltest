@@ -12,8 +12,7 @@ namespace SqlTests
     public class UnitTest1
     {
         const string CS = @"Data Source = .; Initial Catalog = Test; Integrated Security = True; Connect Timeout = 30;";
-        const string Update = "UPDATE [People] SET [Name] = 'Tom' WHERE [Id] = 1";
-        const string Select = "SELECT [Name] FROM [People] WHERE [Id] = 1";
+        const string Select = "WAITFOR DELAY '00:00:05'; SELECT [Name] FROM [People] WHERE [Id] = 1;";
 
         [TestMethod]
         public void Should_Work()
@@ -25,17 +24,12 @@ namespace SqlTests
                     IsolationLevel = IsolationLevel.ReadCommitted
                 }))
             {
-                var ctx = new TestContext();
-                var p = ctx.People.Find(1);
-                p.Name = "Tom";
-                ctx.SaveChanges();
-
                 var tx = Transaction.Current;
                 var name = Task.Run(async () =>
                 {
                     using (var scope2 = new TransactionScope(tx, TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        var result = await Task.WhenAll(from i in Enumerable.Range(0, 5)
+                        var result = await Task.WhenAll(from i in Enumerable.Range(0, 2)
                                            select QueryAsync());
 
                         scope2.Complete();
@@ -58,22 +52,6 @@ namespace SqlTests
                 return await cmd2.ExecuteScalarAsync() as string;
             }
         }
-
-        public class TestContext : DbContext
-        {
-            public TestContext()
-                : base(CS)
-            {
-            }
-
-            public DbSet<People> People { get; set; }
-        }
-
-        public class People
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }       
     }
 }
 
