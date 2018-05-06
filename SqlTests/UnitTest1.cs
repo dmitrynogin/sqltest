@@ -37,7 +37,7 @@ namespace SqlTests
                     }
                 }).Result;
 
-                Assert.AreEqual("Tom", name);
+                Assert.AreEqual("John Doe", name);
             }
         }
 
