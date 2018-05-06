@@ -8,4 +8,4 @@ PRIMARY KEY CLUSTERED
 
 go;
 
-insert into [People] ([Name]) values ('John Doe')  
+INSERT INTO [People] ([Name]) VALUES ('John Doe')  

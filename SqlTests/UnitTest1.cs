@@ -11,7 +11,7 @@ namespace SqlTests
     [TestClass]
     public class UnitTest1
     {
-        const string CS = @"Data Source = .; Initial Catalog = Test; Integrated Security = True; Connect Timeout = 30;";
+        const string CS = @"Data Source = .; Initial Catalog = Test; Integrated Security = True;";
         const string Select = "WAITFOR DELAY '00:00:05'; SELECT [Name] FROM [People] WHERE [Id] = 1;";
 
         [TestMethod]
